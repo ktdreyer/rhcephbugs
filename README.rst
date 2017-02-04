@@ -7,8 +7,10 @@ automate certain bug actions.
 Example
 -------
 
-The ``comment-on-git`` command will parse Jenkins' Git plugin environment
-variables and add comments::
+Jenkins' Git plugin will set some environment variables like ``GIT_URL``,
+``GIT_BRANCH``,  ``GIT_PREVIOUS_SUCCESSFUL_COMMIT``, and ``GIT_COMMIT``. The
+``comment-on-git`` command will parse these environment variables to look at a
+range of git commits and add comments in Bugzilla bugs::
 
     $ PKG=ceph \
       GIT_URL=git://pkgs.devel.redhat.com/rpms/ceph \

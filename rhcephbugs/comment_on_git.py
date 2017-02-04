@@ -76,15 +76,25 @@ def bugs_to_commits(previous, current):
     return bz_commits
 
 
-def build_comment(bz, shas, pkg, branch, repo):
+def build_comment(bz, shas, pkg, branch, repo, event_account):
     """ Return a comment for this BZ and shas. """
+    comment = ''
+    # If we had an event_account (ie Gerrit event push), we just use that
+    # person's name for all shas.
+    if event_account is not None:
+        comment += "%s pushed to %s in %s:\n" % \
+                   (event_account, branch, repo.description)
+        for sha in shas:
+            comment += repo.gitweb(pkg, sha) + "\n"
+        return comment
+
+    # Otherwise, this was a non-Gerrit event. Look through all the committers.
     committers = defaultdict(set)
     for sha in shas:
         committer = git('log', '-1', '--pretty=format:%cn <%ce>', sha,
                         log_cmd=False)
         committers[committer].add(sha)
 
-    comment = ''
     for committer, shas in committers.iteritems():
         comment += "%s committed to %s in %s:\n" % \
                    (committer, branch, repo.description)
@@ -109,7 +119,7 @@ def sanity_check_commits(previous, current):
         raise SystemExit('This is not a fast-forward merge. Exiting.')
 
 
-def run(bz_url, git_url, pkg, branch, previous, current):
+def run(bz_url, git_url, pkg, branch, previous, current, event_account):
 
     sanity_check_commits(previous, current)
 
@@ -131,7 +141,7 @@ def run(bz_url, git_url, pkg, branch, previous, current):
 
     # Comment in each bug with the corresponding commits.
     for bz, shas in bz_commits.iteritems():
-        comment = build_comment(bz, shas, pkg, branch, repo)
+        comment = build_comment(bz, shas, pkg, branch, repo, event_account)
         comment_in_bug(bzapi, bz, comment)
         # TODO: make this more robust against accidental duplicate comments?
         # (Store the list of shas in JSON in the bug's devel whiteboard?)
@@ -156,8 +166,10 @@ def main(argv):
     except KeyError as e:
         raise SystemExit('Missing environment variable %s' % e.message)
 
+    event_account = os.getenv('GERRIT_EVENT_ACCOUNT')
+
     bz_url = 'bugzilla.redhat.com'
     if '--staging' in argv:
         bz_url = 'partner-bugzilla.redhat.com'
         print('Using staging server %s' % bz_url)
-    run(bz_url, git_url, pkg, branch, previous, current)
+    run(bz_url, git_url, pkg, branch, previous, current, event_account)

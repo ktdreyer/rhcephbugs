@@ -92,16 +92,32 @@ class TestBuildComment(object):
                 raise RuntimeError('Unexpected Git command: ' + ' '.join(a))
             return 'Mr Developer <cool@example.com>'
 
-    def test_build_comment(self, monkeypatch):
+    def test_build_comment_no_event(self, monkeypatch):
         monkeypatch.setattr(rhcephbugs.comment_on_git, 'git', self.FakeGit())
         bz = 12345
         shas = set(['154fce30', 'b4c1c387e'])
         pkg = 'calamari-server'
         branch = 'ceph-2-rhel-7'
         repo = Repo('git://pkgs.devel.redhat.com/rpms/calamari-server')
-        result = build_comment(bz, shas, pkg, branch, repo)
+        event_account = None
+        result = build_comment(bz, shas, pkg, branch, repo, event_account)
         assert result == '''\
 Mr Developer <cool@example.com> committed to ceph-2-rhel-7 in RHEL dist-git:
 http://pkgs.devel.redhat.com/cgit/rpms/calamari-server/commit/?id=154fce30
 http://pkgs.devel.redhat.com/cgit/rpms/calamari-server/commit/?id=b4c1c387e
+'''
+
+    def test_build_comment_event_account(self, monkeypatch):
+        monkeypatch.setattr(rhcephbugs.comment_on_git, 'git', self.FakeGit())
+        bz = 12345
+        shas = set(['154fce30', 'b4c1c387e'])
+        pkg = 'ceph'
+        branch = 'ceph-2-rhel-patches'
+        repo = Repo('https://code.engineering.redhat.com/gerrit/ceph')
+        event_account = 'Mr Developer <cool@example.com>'
+        result = build_comment(bz, shas, pkg, branch, repo, event_account)
+        assert result == '''\
+Mr Developer <cool@example.com> pushed to ceph-2-rhel-patches in RHEL patches:
+https://code.engineering.redhat.com/gerrit/gitweb?p=ceph.git;a=commit;h=154fce30
+https://code.engineering.redhat.com/gerrit/gitweb?p=ceph.git;a=commit;h=b4c1c387e
 '''

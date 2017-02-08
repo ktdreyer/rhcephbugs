@@ -6,22 +6,6 @@ from rdopkg.utils.cmd import git
 from rdopkg.utils.exception import CommandFailed
 
 
-REPO_TYPES = {
-    'RHEL dist-git': {
-        'match': 'git://pkgs.devel.redhat.com/rpms/(?:[^/]+)$',
-        'tmpl': 'http://pkgs.devel.redhat.com/cgit/rpms/%(pkg)s/commit/?id=%(commit)s',  # NOQA: E501
-    },
-    'RHEL patches': {
-        'match': 'https://code.engineering.redhat.com/gerrit/(?:[^/]+)$',
-        'tmpl': 'https://code.engineering.redhat.com/gerrit/gitweb?p=%(pkg)s.git;a=commit;h=%(commit)s',  # NOQA: E501
-    },
-    'Ubuntu dist-git': {
-        'match': 'https://code.engineering.redhat.com/gerrit/rcm/ceph-ubuntu/(?:[^/]+)$',  # NOQA: E501
-        'tmpl': 'https://code.engineering.redhat.com/gerrit/gitweb?p=rcm/ceph-ubuntu/%(pkg)s.git;a=commit;h=%(commit)s',  # NOQA: E501
-    },
-}
-
-
 class Repo(object):
     def __init__(self, url):
         """
@@ -52,6 +36,68 @@ class Repo(object):
         """ Returns an HTTP URL for this package and commit (sha1). """
         return self._gitweb_template % {'pkg': pkg, 'commit': commit}
 
+    def build_comment(self, bz, shas, pkg, branch, event_account=None):
+        """ Return a comment for this BZ and shas. """
+        if event_account is not None:
+            # Defensively raise in this case
+            raise RuntimeError('cannot handle event_account %s' %
+                               event_account)
+        committers = defaultdict(set)
+        for sha in shas:
+            committer = git('log', '-1', '--pretty=format:%cn <%ce>', sha,
+                            log_cmd=False)
+            committers[committer].add(sha)
+
+        comment = ''
+        for committer, shas in committers.iteritems():
+            comment += self.comment % {'user': committer, 'branch': branch}
+            for sha in shas:
+                comment += self.gitweb(pkg, sha) + "\n"
+        return comment
+
+
+class RhelDistGit(Repo):
+    # description = 'RHEL dist-git'
+    url = 'http://pkgs.devel.redhat.com/cgit/rpms/%(pkg)s/commit/?id=%(commit)s'  # NOQA: E501
+    comment = "%(user)s committed to %(branch)s in RHEL dist-git\n"
+
+
+class RhelPatches(Repo):
+    # description = 'RHEL patches'
+    url = 'https://code.engineering.redhat.com/gerrit/gitweb?p=%(pkg)s.git;a=commit;h=%(commit)s'  # NOQA: E501
+    comment = "%(user)s pushed to %(branch)s\n"
+
+    def build_comment(self, bz, shas, pkg, branch, event_account):
+        """ Return a comment for this BZ and shas. """
+        # When we have an event_account, we just use that person's name for all
+        # shas here.
+        # TODO: summarize the shas as well (git log --oneline)
+        comment = self.comment % {'user': event_account, 'branch': branch}
+        for sha in shas:
+            comment += self.gitweb(pkg, sha) + "\n"
+        return comment
+
+
+class UbuntuDistGit(Repo):
+    # description = 'Ubuntu dist-git'
+    url = 'https://code.engineering.redhat.com/gerrit/gitweb?p=rcm/ceph-ubuntu/%(pkg)s.git;a=commit;h=%(commit)s'  # NOQA: E501
+    comment = "%(user)s pushed to %(branch)s in Ubuntu dist-git\n"
+
+
+REPO_MATCHES = {
+    'git://pkgs.devel.redhat.com/rpms/(?:[^/]+)$': RhelDistGit,
+    'https://code.engineering.redhat.com/gerrit/(?:[^/]+)$': RhelPatches,
+    'https://code.engineering.redhat.com/gerrit/rcm/ceph-ubuntu/(?:[^/]+)$': UbuntuDistGit,  # NOQA: E501
+}
+
+
+def get_repo(url):
+    """ Factory for Repo objects """
+    for regex, klass in REPO_MATCHES.iteritems():
+        if re.match(regex, url):
+            return klass(url)
+    raise RuntimeError('could not match url %s' % url)
+
 
 def comment_in_bug(bzapi, id_, comment):
     """ Add a comment to bug id_ using bzapi. """
@@ -79,8 +125,6 @@ def bugs_to_commits(previous, current):
 def build_comment(bz, shas, pkg, branch, repo, event_account):
     """ Return a comment for this BZ and shas. """
     comment = ''
-    # If we had an event_account (ie Gerrit event push), we just use that
-    # person's name for all shas.
     if event_account is not None:
         comment += "%s pushed to %s in %s:\n" % \
                    (event_account, branch, repo.description)

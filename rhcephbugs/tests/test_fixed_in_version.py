@@ -51,3 +51,19 @@ def test_multi_distro_add():
     new = Build.factory('ceph_10.2.5-2redhat1', 'Ubuntu')
     fiv.update(new)
     assert str(fiv) == 'RHEL: ceph-10.2.5-2.el7cp Ubuntu: ceph_10.2.5-2redhat1'
+
+
+@pytest.mark.parametrize('sample,expected', [
+    ('', False),
+    ('ceph-10.2.5-2.el7cp', False),
+    ('RHEL: ceph-10.2.5-1.el7cp', False),
+    ('RHEL: ceph-10.2.5-2.el7cp Ubuntu: ceph_10.2.5-2redhat1', True),
+    ('RHEL: calamari-server-1.5.5-1.el7cp Ubuntu: calamari_1.5.5-2redhat1', True),  # NOQA E501
+    ('ceph-ansible-2.2.0-1.el7cp', True),
+    ('RHEL: ceph-ansible-2.2.0-1.el7cp', True),
+    ('RHEL: ceph-10.2.5-1.el7cp ceph-ansible-2.2.0-1.el7cp', False),
+    ('ceph-installer-1.3.0-1.el7cp', True),
+])
+def test_fixed(sample, expected):
+    fiv = FixedInVersion(sample)
+    assert fiv.fixed is expected

@@ -2,6 +2,9 @@ from collections import OrderedDict
 import re
 import productmd.common
 
+# Special-case certain build names.
+RHEL_ONLY = ('ceph-ansible', 'ceph-installer')
+
 
 class Build(object):
     @staticmethod
@@ -98,3 +101,30 @@ class FixedInVersion(object):
         if result == '' and self._orig != '':
             return self._orig
         return result
+
+    @property
+    def fixed(self):
+        """ Return a bool whether this BZ is completely "fixed" or not. """
+        # Rule: if Fixed-In-Version is blank, then it's obviously not fixed.
+        if str(self) == '':
+            return False
+        rhel = self.data.get('RHEL', {})
+        ubuntu = self.data.get('Ubuntu', {})
+        if len(rhel) == 0 and str(self) != '':
+            # We have a non-distro labeled value, eg "ceph-ansible-1-1.el7scon"
+            build = Build.factory(str(self))
+            # Rule: it's fixed iff this package is on the RHEL-only whitelist.
+            return build.name in RHEL_ONLY
+        # Rule: every "RHEL:" labeled build must have a corresponding Ubuntu
+        # build also.
+        for build in rhel.values():
+            # ...Unless it's on the RHEL-only whitelist.
+            if build.name in RHEL_ONLY:
+                continue
+            # ...or unless it's calamari, which has a different name on Ubuntu.
+            if build.name == 'calamari-server' and 'calamari' in ubuntu:
+                continue
+            # ...If the corresponding Ubuntu build is missing, this is unfixed.
+            if build.name not in ubuntu:
+                return False
+        return True

@@ -5,8 +5,11 @@ import productmd.common
 
 class Build(object):
     @staticmethod
-    def factory(nvr, distro):
-        if distro == 'RHEL':
+    def factory(nvr, distro=None):
+        if distro == 'RHEL' \
+          or nvr.endswith('.el7') \
+          or nvr.endswith('.el7cp') \
+          or nvr.endswith('.el7scon'):
             return RhelBuild(nvr)
         elif distro == 'Ubuntu':
             return UbuntuBuild(nvr)

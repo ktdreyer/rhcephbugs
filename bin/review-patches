@@ -1,0 +1,145 @@
+#!/usr/bin/python
+
+import os
+import re
+import bugzilla
+from rdopkg.utils.cmd import git
+from rdopkg.utils.exception import CommandFailed
+
+# Review the new commits to the -patches branch:
+#  - Does each commit contain an rhbz number?
+#  - Do those rhbz numbers correspond to the relevant Ceph product / release
+#    for this Git branch? (based on the bug's release flag?)
+#  - Do any of those commits contain submodule changes?
+
+BZ_URL = 'bugzilla.redhat.com'
+# BZ_URL = 'partner-bugzilla.redhat.com'
+
+
+class NonFastForwardError(Exception):
+    """ These commits cannot fast-forward. """
+    def __init__(self, previous, current):
+        message = '%s is not an ancestor of %s' % (previous, current)
+        Exception.__init__(self, message)
+
+
+class MissingBugError(Exception):
+    """ A commit is missing any rhbz number. """
+    def __init__(self, commit):
+        message = '%s lacks any rhbz number' % commit
+        Exception.__init__(self, message)
+
+
+class WrongBugError(Exception):
+    """ A commit has an incorrect rhbz number for this product's branch. """
+    def __init__(self, bug):
+        message = '%s does not match this branch' % bug.weburl
+        Exception.__init__(self, message)
+
+
+class NoReleaseFlagError(Exception):
+    """ A bug lacks a release flag. """
+    def __init__(self, bug):
+        message = '%s lacks any release flag' % bug.weburl
+        Exception.__init__(self, message)
+
+
+class MultipleReleaseFlagsError(Exception):
+    """ A bug has more than one release flags. """
+    def __init__(self, bug, flags):
+        message = '%s has too many release flags: %s' % (bug.weburl, flags)
+        Exception.__init__(self, message)
+
+
+class SubmoduleChangeError(Exception):
+    """ A commit contains a submodule change. """
+    def __init__(self, commit):
+        message = '%s contains submodule changes' % commit
+        Exception.__init__(self, message)
+
+
+class Commit(object):
+    def __init__(self, abbrev, bugs):
+        self.abbrev = abbrev
+        self.bugs = bugs
+
+    def submodules(self):
+        changes = set()
+        rng = '%s~..%s' % (self.abbrev, self.abbrev)
+        for line in git('diff', '--submodule=log', rng).split("\n"):
+            if line.startswith('Submodule '):
+                changes.add(line)
+        return changes
+
+    def __repr__(self):
+        return 'Commit(%s)' % self.abbrev
+
+
+def get_branch():
+    branch = os.environ['GIT_BRANCH']
+    # Strip the "origin/" prefix from the branch
+    branch = re.sub('^origin/', '', branch)
+    return branch
+
+
+def get_release_flag_name(bug):
+    """ Find the "release" flag for this bug. """
+    names = [flag['name'] for flag in bug.flags]
+    matches = set()
+    for name in names:
+        if re.search('\.[0y]$', name):
+            matches.add(name)
+    if len(matches) == 1:
+        return next(iter(matches))
+    if len(matches) > 1:
+        raise MultipleReleaseFlagsError(bug, matches)
+    print('Searched flags %s' % names)
+    raise NoReleaseFlagError(bug)
+
+
+def get_bug_branch(bug):
+    """
+    Return an expected -patches branch for a bug, based on the release flag.
+    """
+    flag = get_release_flag_name(bug)
+    release = flag[:-2]  # strip off the ".0" or ".y" flag value
+    return '%s-rhel-patches' % release
+
+
+def get_commits():
+    previous = os.environ['GIT_PREVIOUS_SUCCESSFUL_COMMIT']
+    current = os.environ['GIT_COMMIT']
+    try:
+        git('merge-base', '--is-ancestor', previous, current, log_cmd=False)
+    except CommandFailed:
+        print('This is not a fast-forward merge. Exiting.')
+        raise NonFastForwardError(previous, current)
+    commits = []
+    for (abbrev, desc, bugs) in git.get_commit_bzs(previous, current):
+        c = Commit(abbrev, bugs)
+        commits.append(c)
+    return commits
+
+
+branch = get_branch()
+commits = get_commits()
+
+bzapi = bugzilla.Bugzilla(BZ_URL)
+# Note that python-bugzilla expects to find a user token in the Jenkins
+# slave's $HOME/.bugzillatoken. You can generate it with the "bugzilla
+# login" command.
+if not bzapi.logged_in:
+    raise SystemExit('Not logged into %s. See ~/.bugzillatoken.' % BZ_URL)
+
+bug_ids = set()
+for commit in commits:
+    if commit.submodules():
+        raise SubmoduleChangeError(commit)
+    if not commit.bugs:
+        raise MissingBugError(commit)
+    for bug in commit.bugs:
+        bug_ids.add(bug)
+
+for bug in bzapi.getbugs(bug_ids):
+    if get_bug_branch(bug) != branch:
+        raise WrongBugError(bug)

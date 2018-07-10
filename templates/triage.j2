@@ -1,0 +1,16 @@
+Subject: {% now "utc", "%b %e" %} bug actions for RHCS {{ release }}{{ milestone }}
+
+
+Actions:
+
+{% for person in people %}
+ - {{ person.name }}
+{% endfor %}
+
+{% for person in people %}
+{% for bug in person.bugs %}
+https://bugzilla.redhat.com/{{ bug.id }} - {{ bug.status }} - {{ bug.summary }}
+Action: {{ bug.action }}
+
+{% endfor %}
+{% endfor %}

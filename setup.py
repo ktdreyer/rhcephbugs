@@ -105,6 +105,9 @@ setup(
     install_requires=[
         'rdopkg',
         'productmd',
+        'Jinja2',
+        'jinja2-time',
+        'SQLAlchemy',
     ],
     tests_require=[
         'pytest',

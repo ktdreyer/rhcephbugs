@@ -10,7 +10,6 @@ from rhcephbugs.triage.models import create_all, get_session
 from rhcephbugs.triage.report import report_everyone
 
 
-
 BZ_URL = 'bugzilla.redhat.com'
 PRODUCT = 'Red Hat Ceph Storage'
 

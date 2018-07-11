@@ -53,6 +53,19 @@ def setup_db(bugs):
 
 
 def main():
+    # TODO: a CLI with subcommands:
+    # triage update 3.1 rc
+    #  Refresh all data from Bugzilla, and set any new actions as needed.
+    #
+    # triage set-action <bznumber>
+    #  Rewrite action description for this single bz.
+    #
+    # triage report
+    #   Print the "all users" report to STDOUT
+    #
+    # This will make it possible to store all the data directly with SQLAlchemy
+    # and avoid the YAML files.
+
     release = '3.1'
     milestone = 'rc'
     bugs = bug_cache()

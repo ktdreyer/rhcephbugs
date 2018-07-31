@@ -1,11 +1,24 @@
 rhcephbugs
 ==========
 
-Common code for managing RH Ceph Storage bugs. We use this with Jenkins jobs to
-automate certain bug actions.
+Common code for managing RH Ceph Storage bugs.
 
-Example
--------
+Some of these utilities can run in Jenkins, others are human decision
+amplifiers.
+
+triage
+------
+
+The triage tool has two commands, ``update`` and ``report``.
+
+The ``update`` subcommand will query all BZs for a release and prompt the user
+to describe the next action for each BZ.
+
+The ``report`` subcommand will print a report to STDOUT for this release.
+
+
+comment-on-git example
+----------------------
 
 Jenkins' Git plugin will set some environment variables like ``GIT_URL``,
 ``GIT_BRANCH``,  ``GIT_PREVIOUS_SUCCESSFUL_COMMIT``, and ``GIT_COMMIT``. The

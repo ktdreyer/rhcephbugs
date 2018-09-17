@@ -72,25 +72,3 @@ def sort_by_status(bug):
         return 4
     if bug.status == 'ON_QA':
         return 5
-
-
-def bug_cache(bugs=None):
-    """
-    read/write a list of bugs from/to pickle file
-
-    :param bugs: if None, simply return the cache results. If not None, write
-                 the data to the cache.
-    """
-    filename = 'bugs.pickle'
-    if bugs is None:
-        # Read and return the pickle file
-        try:
-            with open(filename, 'rb') as fh:
-                return pickle.load(fh)
-        except IOError as e:
-            if e.errno != errno.ENOENT:
-                raise
-            return None
-    with open(filename, 'wb') as fh:
-        pickle.dump(bugs, fh)
-    return bugs

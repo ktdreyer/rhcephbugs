@@ -5,7 +5,7 @@ from rhcephbugs.triage.models import Person
 from rhcephbugs.triage.models import Bug as BugModel
 from rhcephbugs.triage.models import create_all, get_session
 from rhcephbugs.triage.template import report_everyone
-from rhcephbugs.triage.bz import query_params, search, bug_cache
+from rhcephbugs.triage.bz import query_params, search
 
 
 """
@@ -26,13 +26,8 @@ def report(args):
     release = args.target_release
     milestone = args.target_milestone
 
-    bugs = bug_cache()
-    # HACK: pickle bugs for this release so we don't have to load BZ each time.
-    if bugs is None:
-        print('no bugs cached, quering Bugzilla')
-        payload = query_params(release, milestone)
-        bugs = search(payload)
-        bug_cache(bugs)
+    payload = query_params(release, milestone)
+    bugs = search(payload)
 
     print('Found %d bugs blocking %s %s' % (len(bugs), release, milestone))
 

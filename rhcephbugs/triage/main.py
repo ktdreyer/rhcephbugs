@@ -7,7 +7,8 @@ def main():
     parser = argparse.ArgumentParser()
 
     # top-level subcommands:
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(dest='subcommand')
+    subparsers.required = True
 
     # add arguments for each subcommand:
     rhcephbugs.triage.update.add_parser(subparsers)

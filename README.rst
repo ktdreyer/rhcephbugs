@@ -53,3 +53,14 @@ TODO List
 - Move bug to "MODIFIED" when both RHEL and Ubuntu "Fixed In Version" are set.
 
 - Attach bug to Errata Tool advisory when build completes.
+
+TODO List for "triage"
+----------------------
+
+- Write some "assistence" plugins
+
+- Is there a upstream ticket attached?
+
+- What were the last changes since "last updated time"?
+
+- What is the BZ assignee's name?

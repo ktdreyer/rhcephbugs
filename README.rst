@@ -64,3 +64,10 @@ TODO List for "triage"
 - What were the last changes since "last updated time"?
 
 - What is the BZ assignee's name?
+
+- Show updated time in relative time ("last modified 3 minutes ago")
+
+- Shortcuts, like "Ken nextstep" expands to "Ken to determine next step for
+  this BZ"
+
+- If we have many bugs, show a progress indicator, like "1/63"

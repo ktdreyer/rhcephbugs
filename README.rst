@@ -71,3 +71,5 @@ TODO List for "triage"
   this BZ"
 
 - If we have many bugs, show a progress indicator, like "1/63"
+
+- Highlight "hot_fix_requested" in the report, because these are high-priority.

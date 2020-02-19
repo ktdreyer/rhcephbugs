@@ -16,6 +16,15 @@ to describe the next action for each BZ.
 
 The ``report`` subcommand will print a report to STDOUT for this release.
 
+retarget
+--------
+
+The retarget tool will mass-retarget bugs from one target milestone to
+another.
+::
+
+    retarget 3.3 z3 z4 1801090
+
 
 comment-on-git example
 ----------------------

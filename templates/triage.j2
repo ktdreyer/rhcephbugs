@@ -4,7 +4,7 @@ Subject: {% now "utc", "%b %-e" %} bug actions for RHCS {{ release }}{{ mileston
 Actions:
 
 {% for person in people %}
- - {{ person.name }}
+ - {{ person.name }} ({{ person.bugs | length }})
 {% endfor %}
 
 {% for person in people %}

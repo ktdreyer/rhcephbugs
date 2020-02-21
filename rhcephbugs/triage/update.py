@@ -58,12 +58,12 @@ def find_action(bug):
     action = status.get('action')
     last_change_time = status.get('last_change_time')
     if not last_change_time:
-        print('No last recorded date for %s' % bug.weburl)
+        print('No last recorded date for %s' % bug.bug_id)
         action = prompt_new_action(action)
         save_status(bug, action)
         return action
     if bug.last_change_time.value > last_change_time:
-        print('%s has changed since last recorded action' % bug.weburl)
+        print('%s has changed since last recorded action' % bug.bug_id)
         # TODO: maybe give other options here:
         # 1) "go back" if you want to edit the previous one
         # 2) "show last comment" to see the final comment ...

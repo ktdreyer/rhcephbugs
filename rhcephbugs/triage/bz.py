@@ -1,6 +1,4 @@
 from __future__ import print_function, absolute_import
-import errno
-import pickle
 from bugzilla import Bugzilla
 from bugzilla.bug import Bug
 

@@ -27,9 +27,10 @@ def update(args):
 
     sorted_bugs = sorted(bugs, key=sort_by_status)
 
-    for bug in sorted_bugs:
-        print('https://bugzilla.redhat.com/%d - %s - %s'
-              % (bug.id, bug.status, bug.summary))
+    for index, bug in enumerate(sorted_bugs, start=1):
+        print('(%d of %d) https://bugzilla.redhat.com/%d - %s' %
+              (index, total_count, bug.id, bug.status))
+        print('  ' + bug.summary)
         # TODO: does this print the human-readable delta?
         # Would be nice to break this into business days too
         # time = bug.last_change_time.value

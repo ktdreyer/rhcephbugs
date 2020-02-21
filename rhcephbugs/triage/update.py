@@ -22,7 +22,8 @@ def update(args):
     milestone = args.target_milestone
     payload = query_params(release, milestone)
     bugs = search(payload)
-    print('Found %d bugs blocking %s %s' % (len(bugs), release, milestone))
+    total_count = len(bugs)
+    print('Found %d bugs blocking %s %s' % (total_count, release, milestone))
 
     sorted_bugs = sorted(bugs, key=sort_by_status)
 

@@ -88,7 +88,26 @@ def load_status(bug):
 
 
 def save_status(bug, action):
-    """ Persist a bug's action to disk. """
+    """
+    Persist a bug's action to disk.
+
+    Why do we store the results in plaintext YAML files instead of the sqlite
+    database that we use for reporting? The reason is that humans have to
+    read, search, and edit the data by hand. Here are some use-cases:
+
+    - I have to correct a status for a particular ID after I submit it.
+    - I have to correct a set of statuses that contain a particular substring
+      where I got the status wrong or typo'd someone's name.
+    - I have to grep and count all the bugs that have the same substring in
+      their status (For example, to count how many bugs will be fixed by a
+      planned rebase).
+    - I have to grep to find a bug that has a substring in its status in order
+      to paste that status into other bugs.
+
+    It is easier to write the canonical statuses to the YAML files, and then
+    load those into sqlite later for processing and reporting.
+    """
+
     filename = 'status/%d.yml' % bug.id
     data = {
         'action': action,

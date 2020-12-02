@@ -16,9 +16,9 @@ def get_template():
     return env.get_template(filename)
 
 
-def report_everyone(release, milestone, people):
+def report_everyone(release, people):
     """
     Report on all people
     """
     template = get_template()
-    return template.render(release=release, milestone=milestone, people=people)
+    return template.render(release=release, people=people)

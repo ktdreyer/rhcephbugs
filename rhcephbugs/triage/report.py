@@ -18,22 +18,20 @@ def add_parser(subparsers):
     parser = subparsers.add_parser('report', help='report BZ statuses')
 
     parser.add_argument('target_release', help='for example: 3.0, or 3.1')
-    parser.add_argument('target_milestone', help='for example: rc, or z1')
     parser.set_defaults(func=report)
 
 
 def report(args):
     release = args.target_release
-    milestone = args.target_milestone
 
-    payload = query_params(release, milestone)
+    payload = query_params(release)
     bugs = search(payload)
 
-    print('Found %d bugs blocking %s %s' % (len(bugs), release, milestone))
+    print('Found %d bugs blocking %s' % (len(bugs), release))
 
     session = setup_db(bugs)
     people = session.query(Person).order_by(Person.name).all()
-    report = report_everyone(release, milestone, people)
+    report = report_everyone(release, people)
     print(report)
 
 

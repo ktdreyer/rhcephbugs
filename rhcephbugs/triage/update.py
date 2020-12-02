@@ -12,18 +12,16 @@ def add_parser(subparsers):
     """ Add our "update" parser to this top-level subparsers object. """
     parser = subparsers.add_parser('update', help='update BZ statuses')
 
-    parser.add_argument('target_release', help='for example: 3.0, or 3.1')
-    parser.add_argument('target_milestone', help='for example: rc, or z1')
+    parser.add_argument('target_release', help='for example: 4.2, or 4.2z1')
     parser.set_defaults(func=update)
 
 
 def update(args):
     release = args.target_release
-    milestone = args.target_milestone
-    payload = query_params(release, milestone)
+    payload = query_params(release)
     bugs = search(payload)
     total_count = len(bugs)
-    print('Found %d bugs blocking %s %s' % (total_count, release, milestone))
+    print('Found %d bugs blocking %s' % (total_count, release))
 
     sorted_bugs = sorted(bugs, key=sort_by_status)
 

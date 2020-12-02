@@ -26,12 +26,11 @@ def search(payload):
     return bugs
 
 
-def query_params(release, milestone):
+def query_params(release):
     """
     Return a dict of basic Bugzilla search parameters.
 
-    :param release: eg. "3.0"
-    :param milestone: eg. "z4"
+    :param release: eg. "4.2" or "4.2z1"
     """
     params = {
         'include_fields': ['id', 'summary', 'status', 'last_change_time'],
@@ -44,15 +43,12 @@ def query_params(release, milestone):
         'f3': 'target_release',
         'o3': 'equals',
         'v3': release,
-        'f4': 'target_milestone',
-        'o4': 'equals',
-        'v4': milestone,
-        'f5': 'keywords',
-        'o5': 'nowords',
-        'v5': ['Tracking', 'TestOnly'],
-        'f6': 'bug_status',
-        'o6': 'anywords',
-        'v6': 'NEW ASSIGNED POST MODIFIED ON_DEV'
+        'f4': 'keywords',
+        'o4': 'nowords',
+        'v4': ['Tracking', 'TestOnly'],
+        'f5': 'bug_status',
+        'o5': 'anywords',
+        'v5': 'NEW ASSIGNED POST MODIFIED ON_DEV'
     }
     return params.copy()
 

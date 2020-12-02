@@ -2,8 +2,8 @@ from collections import defaultdict
 import os
 import re
 import bugzilla
-from rdopkg.utils.cmd import git
-from rdopkg.utils.exception import CommandFailed
+from rdopkg.utils.git import git
+from rdopkg.exception import CommandFailed
 
 
 class Repo(object):

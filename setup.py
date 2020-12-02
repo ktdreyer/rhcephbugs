@@ -99,7 +99,6 @@ setup(
     long_description=long_description,
     author='Ken Dreyer',
     author_email='kdreyer@redhat.com',
-    scripts=['bin/comment-on-git'],
     license='MIT',
     include_package_data=True,
     install_requires=[

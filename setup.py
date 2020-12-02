@@ -103,6 +103,7 @@ setup(
     license='MIT',
     include_package_data=True,
     install_requires=[
+        'bugzilla',
         'rdopkg',
         'productmd',
         'Jinja2',

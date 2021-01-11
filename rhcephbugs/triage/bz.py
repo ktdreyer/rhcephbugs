@@ -38,6 +38,7 @@ def query_params(release):
             'summary',
             'status',
             'last_change_time',
+            'assigned_to',
         ],
         'f1': 'product',
         'o1': 'equals',

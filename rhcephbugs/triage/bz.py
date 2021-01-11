@@ -33,7 +33,12 @@ def query_params(release):
     :param release: eg. "4.2" or "4.2z1"
     """
     params = {
-        'include_fields': ['id', 'summary', 'status', 'last_change_time'],
+        'include_fields': [
+            'id',
+            'summary',
+            'status',
+            'last_change_time',
+        ],
         'f1': 'product',
         'o1': 'equals',
         'v1': PRODUCT,

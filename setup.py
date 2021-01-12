@@ -104,6 +104,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'bugzilla',
+        'humanize',
         'rdopkg',
         'productmd',
         'Jinja2',

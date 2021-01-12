@@ -1,3 +1,5 @@
+import humanize
+import datetime
 import errno
 import yaml
 from rhcephbugs.triage.bz import query_params, search, sort_by_status
@@ -29,13 +31,18 @@ def update(args):
         print('(%d of %d) %s https://bugzilla.redhat.com/%d - %s' %
               (index, total_count, bug.status, bug.id, bug.assigned_to))
         print('  ' + bug.summary)
-        # TODO: does this print the human-readable delta?
-        # Would be nice to break this into business days too
-        # time = bug.last_change_time.value
-        # converted = datetime.datetime.strptime(time, "%Y%m%dT%H:%M:%S")
-        # print('Last changed: %s' % converted)
+        delta = naturaldelta(bug.last_change_time.value)
+        print('  Last changed %s ago' % delta)
         print('Action: %s' % find_action(bug))
         print('')
+
+
+def naturaldelta(time_str):
+    """ humanize.naturaldelta() on a xmlrpc.client.DateTime value string. """
+    # TODO: Would be nice to break this into business days too
+    time = datetime.datetime.strptime(time_str, "%Y%m%dT%H:%M:%S")
+    difference = time - datetime.datetime.utcnow()
+    return humanize.naturaldelta(difference)
 
 
 def prompt_new_action(old_action):

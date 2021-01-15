@@ -45,7 +45,24 @@ TODO List
 TODO List for "triage"
 ----------------------
 
+- Refactor "update" to a curses GUI.
+
 - Write some "assistence" plugins
+
+  - "default suggestion" plugin or code:
+
+    - If in NEW or ASSIGNED
+
+        - If assignee is *not* a manager: "<assignee> to determine next step for this BZ"
+        - If assignee is a manager: "<assignee> to assign to an engineer"
+
+    - If in POST and no Fixed In Version set:
+
+      - "Ken to set Fixed In Version and attach to ET"
+
+    - If in POST and Fixed In Version set: manually verify that fix is in the latest build
+
+    - If in POST/MODIFIED and FIV: "Ken to attach to ET"
 
 - Is there a upstream ticket attached?
 

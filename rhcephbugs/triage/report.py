@@ -56,7 +56,7 @@ def setup_db(bugs):
 
     for bug in bugs:
         status = load_status(bug)
-        if not status:
+        if not status or not status['action']:
             continue
 
         # Get/Create a Person for this bug.

@@ -28,8 +28,9 @@ def update(args):
     sorted_bugs = sorted(bugs, key=sort_by_status)
 
     for index, bug in enumerate(sorted_bugs, start=1):
-        print('(%d of %d) %s https://bugzilla.redhat.com/%d - %s' %
-              (index, total_count, bug.status, bug.id, bug.assigned_to))
+        title = f'{index} of {total_count} {bug.status} ' \
+                f'https://bugzilla.redhat.com/{bug.id} - {bug.assigned_to}'
+        print(title)
         print('  ' + bug.summary)
         delta = naturaldelta(bug.last_change_time.value)
         print('  Last changed %s ago' % delta)

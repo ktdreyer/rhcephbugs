@@ -3,6 +3,7 @@ import datetime
 import errno
 import yaml
 from rhcephbugs.triage.bz import query_params, search, sort_by_status
+from colorama import init, Fore, Style
 try:
     # Python 2 backwards compat
     from __builtin__ import raw_input as input
@@ -23,6 +24,7 @@ def update(args):
     payload = query_params(release)
     bugs = search(payload)
     total_count = len(bugs)
+    init(autoreset=True)
     print('Found %d bugs blocking %s' % (total_count, release))
 
     sorted_bugs = sorted(bugs, key=sort_by_status)
@@ -30,11 +32,11 @@ def update(args):
     for index, bug in enumerate(sorted_bugs, start=1):
         title = f'{index} of {total_count} {bug.status} ' \
                 f'https://bugzilla.redhat.com/{bug.id} - {bug.assigned_to}'
-        print(title)
+        print(Style.BRIGHT + Fore.YELLOW + title)
         print('  ' + bug.summary)
         delta = naturaldelta(bug.last_change_time.value)
-        print('  Last changed %s ago' % delta)
-        print('Action: %s' % find_action(bug))
+        print(Style.DIM + '  Last changed %s ago' % delta)
+        print(Fore.GREEN + 'Action: %s' % find_action(bug))
         print('')
 
 

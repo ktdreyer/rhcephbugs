@@ -30,8 +30,9 @@ def update(args):
     sorted_bugs = sorted(bugs, key=sort_by_status)
 
     for index, bug in enumerate(sorted_bugs, start=1):
+        assignee = find_assignee(bug)
         title = f'{index} of {total_count} {bug.status} ' \
-                f'https://bugzilla.redhat.com/{bug.id} - {bug.assigned_to}'
+                f'https://bugzilla.redhat.com/{bug.id} - {assignee}'
         print(Style.BRIGHT + Fore.YELLOW + title)
         print('  ' + bug.summary)
         delta = naturaldelta(bug.last_change_time.value)
@@ -123,3 +124,10 @@ def save_status(bug, action):
     }
     with open(filename, 'w') as stream:
         yaml.dump(data, stream, default_flow_style=False)
+
+
+def find_assignee(bug):
+    name = bug.assigned_to_detail['real_name']
+    # Add special cases here for any accounts where "real_name" is unavailble
+    # or incorrect.
+    return name

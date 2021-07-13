@@ -1,3 +1,4 @@
+import os
 import humanize
 import datetime
 import errno
@@ -127,7 +128,14 @@ def save_status(bug, action):
 
 
 def find_assignee(bug):
-    name = bug.assigned_to_detail['real_name']
-    # Add special cases here for any accounts where "real_name" is unavailble
-    # or incorrect.
+    """Read human name from a cache and fall back to Bugzilla's user name
+    """
+    xdg_cache_home = os.getenv('XDG_CACHE_HOME', '~/.cache')
+    xdg_cache_home = os.path.expanduser(xdg_cache_home)
+    cache_path = os.path.join(xdg_cache_home, 'rhcephbugs', bug.assigned_to)
+    try:
+        with open(cache_path) as file:
+            name = file.read().strip()
+    except FileNotFoundError:
+        name = bug.assigned_to_detail['real_name']
     return name

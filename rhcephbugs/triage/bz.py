@@ -20,11 +20,20 @@ def search(payload):
     Send a payload to the Bug.search RPC, and translate the result into
     bugzilla.bug.Bug results.
 
-    :param dict payload: A payload to search.
+    :param dict payload: A payload to search. Warning: this method mutates
+                         this dict, adding "limit" and "offset" parameters.
     """
     bzapi = connect()
     result = bzapi._proxy.Bug.search(payload)
     bugs = [Bug(bzapi, dict=r) for r in result['bugs']]
+    total_matches = result['total_matches']
+    payload['limit'] = result['limit']
+    payload['offset'] = result['offset']
+    while len(bugs) < total_matches:
+        payload['offset'] += result['limit']
+        result = bzapi._proxy.Bug.search(payload)
+        more_bugs = [Bug(bzapi, dict=r) for r in result['bugs']]
+        bugs.extend(more_bugs)
     return bugs
 
 

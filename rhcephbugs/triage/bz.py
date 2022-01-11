@@ -19,6 +19,8 @@ def search(payload):
     """
     Send a payload to the Bug.search RPC, and translate the result into
     bugzilla.bug.Bug results.
+
+    :param dict payload: A payload to search.
     """
     bzapi = connect()
     result = bzapi._proxy.Bug.search(payload)

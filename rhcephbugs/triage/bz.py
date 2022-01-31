@@ -37,12 +37,18 @@ def search(payload):
     return bugs
 
 
-def query_params(release):
+def query_params(release, all_statuses):
     """
     Return a dict of basic Bugzilla search parameters.
 
     :param release: eg. "4.2" or "4.2z1"
+    :param bool all_statuses: If True, query all BZ states, not just POST and
+                              MODIFIED
     """
+    if all_statuses:
+        statuses = 'NEW ASSIGNED POST MODIFIED ON_DEV'
+    else:
+        statuses = 'POST MODIFIED ON_DEV'
     params = {
         'include_fields': [
             'id',
@@ -65,7 +71,7 @@ def query_params(release):
         'v4': ['Tracking', 'TestOnly'],
         'f5': 'bug_status',
         'o5': 'anywords',
-        'v5': 'NEW ASSIGNED POST MODIFIED ON_DEV'
+        'v5': statuses,
     }
     return params.copy()
 

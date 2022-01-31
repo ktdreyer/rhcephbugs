@@ -17,12 +17,17 @@ def add_parser(subparsers):
     parser = subparsers.add_parser('update', help='update BZ statuses')
 
     parser.add_argument('target_release', help='for example: 4.2, or 4.2z1')
+    parser.add_argument('--all', action='store_true',
+                        help='Query all BZ states, not just '
+                             'POST/ON_DEV/MODIFIED. Use this to get a bigger '
+                             'picture of the release, not just build '
+                             'team-related bugs.')
     parser.set_defaults(func=update)
 
 
 def update(args):
     release = args.target_release
-    payload = query_params(release)
+    payload = query_params(release, args.all)
     bugs = search(payload)
     total_count = len(bugs)
     init(autoreset=True)

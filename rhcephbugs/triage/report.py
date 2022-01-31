@@ -18,13 +18,18 @@ def add_parser(subparsers):
     parser = subparsers.add_parser('report', help='report BZ statuses')
 
     parser.add_argument('target_release', help='for example: 3.0, or 3.1')
+    parser.add_argument('--all', action='store_true',
+                        help='Query all BZ states, not just '
+                             'POST/ON_DEV/MODIFIED. Use this to get a bigger '
+                             'picture of the release, not just build '
+                             'team-related bugs.')
     parser.set_defaults(func=report)
 
 
 def report(args):
     release = args.target_release
 
-    payload = query_params(release)
+    payload = query_params(release, args.all)
     bugs = search(payload)
 
     print('Found %d bugs blocking %s' % (len(bugs), release))

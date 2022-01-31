@@ -17,7 +17,7 @@ def add_parser(subparsers):
     """ Add our "report" parser to this top-level subparsers object. """
     parser = subparsers.add_parser('report', help='report BZ statuses')
 
-    parser.add_argument('target_release', help='for example: 3.0, or 3.1')
+    parser.add_argument('target_release', help='for example: 4.2, or 4.2z1')
     parser.add_argument('--all', action='store_true',
                         help='Query all BZ states, not just '
                              'POST/ON_DEV/MODIFIED. Use this to get a bigger '

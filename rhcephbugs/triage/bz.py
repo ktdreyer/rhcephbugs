@@ -11,7 +11,7 @@ def connect():
     """ Return a logged-in connection. """
     bzapi = Bugzilla(BZ_URL)
     if not bzapi.logged_in:
-        raise SystemExit('Not logged in, see ~/.bugzillatoken.')
+        raise SystemExit('Not logged in, see ~/.config/python-bugzilla/bugzillarc.')
     return bzapi
 
 

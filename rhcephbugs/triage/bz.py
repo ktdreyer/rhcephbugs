@@ -66,12 +66,9 @@ def query_params(release, all_statuses):
         'f3': 'target_release',
         'o3': 'equals',
         'v3': release,
-        'f4': 'keywords',
-        'o4': 'nowords',
-        'v4': ['Tracking', 'TestOnly'],
-        'f5': 'bug_status',
-        'o5': 'anywords',
-        'v5': statuses,
+        'f4': 'bug_status',
+        'o4': 'anywords',
+        'v4': statuses,
     }
     return params.copy()
 

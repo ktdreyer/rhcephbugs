@@ -38,7 +38,7 @@ def update(args):
     for index, bug in enumerate(sorted_bugs, start=1):
         assignee = find_assignee(bug)
         title = f'{index} of {total_count} {bug.status} ' \
-                f'https://bugzilla.redhat.com/{bug.id} - {assignee}'
+            f'https://bugzilla.redhat.com/{bug.id} - {assignee}'
         print(Style.BRIGHT + Fore.YELLOW + title)
         print('  ' + bug.summary)
         delta = naturaldelta(bug.last_change_time.value)

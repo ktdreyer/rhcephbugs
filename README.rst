@@ -59,8 +59,13 @@ TODO List for "triage"
 - Some report of "time spent waiting on development"
 
 - Ignore the following changes:
-  PM Score field update by ccit-bugzilla@redhat.com
-  QA Whiteboard changes
-  TestBlocker keyword addition or removal
-  CC field changes
-  QA Contact changes
+
+  - PM Score field update by ccit-bugzilla@redhat.com
+
+  - QA Whiteboard changes
+
+  - TestBlocker keyword addition or removal
+
+  - CC field changes
+
+  - QA Contact changes

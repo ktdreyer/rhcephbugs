@@ -37,6 +37,9 @@ def update(args):
 
     for index, bug in enumerate(sorted_bugs, start=1):
         assignee = find_assignee(bug)
+        # For performance, we don't request target_release in include_fields.
+        # Assign it here instead. (As a list, for BZ API compatibility.)
+        bug.target_release = [release]
         title = f'{index} of {total_count} {bug.status} ' \
             f'https://bugzilla.redhat.com/{bug.id} - {assignee}'
         print(Style.BRIGHT + Fore.YELLOW + title)
@@ -55,7 +58,7 @@ def naturaldelta(time_str):
     return humanize.naturaldelta(difference)
 
 
-def prompt_new_action(old_action):
+def prompt_new_action(bug, old_action):
     prompt = 'Enter an action for this bug: >'
     if old_action:
         print('Old action was:')
@@ -65,9 +68,28 @@ def prompt_new_action(old_action):
         new_action = input(prompt)
     except KeyboardInterrupt:
         raise SystemExit("\nNot proceeding")
-    if new_action:
+    if not new_action:
+        return old_action
+    # Shortcuts start with ".":
+    if not new_action.startswith('.'):
         return new_action
-    return old_action
+    if new_action.startswith('.autobug'):
+        return 'Ken to autobug to attach to ET advisory'
+    assignee = find_assignee(bug, first_name=True)
+    patches_branch = find_patches_branch(bug)
+    if new_action.startswith('.c'):
+        return f'{assignee} to cherry-pick to {patches_branch} branch'
+    if new_action.startswith('.n'):
+        return f'{assignee} to determine next step for this BZ'
+    if new_action.startswith('.up'):
+        return f'{assignee} to fix upstream and cherry-pick to {patches_branch} downstream'
+    # Unknown shortcut. Print help message.
+    print(' .autobug - Ken to autobug')
+    print(f' .c - {assignee} to cherry-pick to {patches_branch}')
+    print(' .help - this text')
+    print(f' .n - {assignee} determine next step for this BZ')
+    print(f' .up -{assignee} to fix upstream and cherry-pick to {patches_branch} downstream')
+    return prompt_new_action(bug, old_action)
 
 
 def find_action(bug):
@@ -76,7 +98,7 @@ def find_action(bug):
     last_change_time = status.get('last_change_time')
     if not last_change_time:
         print('No last recorded date for %s' % bug.bug_id)
-        action = prompt_new_action(action)
+        action = prompt_new_action(bug, action)
         save_status(bug, action)
         return action
     if bug.last_change_time.value > last_change_time:
@@ -85,7 +107,7 @@ def find_action(bug):
         # 1) "go back" if you want to edit the previous one
         # 2) "show last comment" to see the final comment ...
         #    ... or do this by default?
-        action = prompt_new_action(action)
+        action = prompt_new_action(bug, action)
         save_status(bug, action)
     return action
 
@@ -132,7 +154,7 @@ def save_status(bug, action):
         yaml.dump(data, stream, default_flow_style=False)
 
 
-def find_assignee(bug):
+def find_assignee(bug, first_name=False):
     """Read human name from a cache and fall back to Bugzilla's user name
     """
     xdg_cache_home = os.getenv('XDG_CACHE_HOME', '~/.cache')
@@ -143,4 +165,16 @@ def find_assignee(bug):
             name = file.read().strip()
     except FileNotFoundError:
         name = bug.assigned_to_detail['real_name']
+    if first_name and ' ' in name:
+        name, _ = name.split(' ', 1)
     return name
+
+
+def find_patches_branch(bug):
+    """
+    Find the downstream -patches branch that corresponds to this bug's target
+    release.
+    """
+    target_release = bug.target_release[0]  # "7.1" or "6.1z4", etc
+    target_release = target_release.split('z', 1)[0]
+    return f'ceph-{target_release}-rhel-patches'

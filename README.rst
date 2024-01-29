@@ -14,6 +14,14 @@ The triage tool has two commands, ``update`` and ``report``.
 The ``update`` subcommand will query all BZs for a release and prompt the user
 to describe the next action for each BZ.
 
+Shortcuts for ``update`` descriptions:
+
+- ``.autobug`` - Ken to autobug
+- ``.c`` - {assignee} to cherry-pick to {patches_branch}
+- ``.help`` - this text
+- ``.n`` - {assignee} determine next step for this BZ
+- ``.up`` - to fix upstream and cherry-pick to {patches_branch} downstream
+
 The ``report`` subcommand will print a report to STDOUT for this release.
 
 retarget
@@ -68,8 +76,6 @@ TODO List for "triage"
 
 - What were the last changes since "last updated time"?
 
-- Shortcuts, like "Ken nextstep" expands to "Ken to determine next step for
-  this BZ"
 
 - Highlight "hot_fix_requested" in the report, because these are high-priority.
 

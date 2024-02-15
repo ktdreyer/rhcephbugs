@@ -83,12 +83,14 @@ def prompt_new_action(bug, old_action):
         return f'{assignee} to determine next step for this BZ'
     if new_action.startswith('.up'):
         return f'{assignee} to fix upstream and cherry-pick to {patches_branch} downstream'
+    if new_action.startswith('.q'):
+        return f'{qa_contact} to set qa_ack+ flag'
     # Unknown shortcut. Print help message.
     print(' .autobug - Ken to autobug')
     print(f' .c - {assignee} to cherry-pick to {patches_branch}')
     print(' .help - this text')
     print(f' .n - {assignee} determine next step for this BZ')
-    print(f' .up -{assignee} to fix upstream and cherry-pick to {patches_branch} downstream')
+    print(f' .up - {assignee} to fix upstream and cherry-pick to {patches_branch} downstream')
     return prompt_new_action(bug, old_action)
 
 

@@ -56,6 +56,7 @@ def query_params(release, all_statuses):
             'status',
             'last_change_time',
             'assigned_to',
+            'qa_contact',
         ],
         'f1': 'product',
         'o1': 'equals',

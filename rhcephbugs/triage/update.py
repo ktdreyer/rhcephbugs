@@ -76,6 +76,7 @@ def prompt_new_action(bug, old_action):
     if new_action.startswith('.autobug'):
         return 'Ken to autobug to attach to ET advisory'
     assignee = find_assignee(bug, first_name=True)
+    qa_contact = find_qa_contact(bug, first_name=True)
     patches_branch = find_patches_branch(bug)
     if new_action.startswith('.c'):
         return f'{assignee} to cherry-pick to {patches_branch} branch'
@@ -91,6 +92,7 @@ def prompt_new_action(bug, old_action):
     print(' .help - this text')
     print(f' .n - {assignee} determine next step for this BZ')
     print(f' .up - {assignee} to fix upstream and cherry-pick to {patches_branch} downstream')
+    print(f' .q - {qa_contact} to fix upstream and cherry-pick to {patches_branch} downstream')
     return prompt_new_action(bug, old_action)
 
 
@@ -167,6 +169,22 @@ def find_assignee(bug, first_name=False):
             name = file.read().strip()
     except FileNotFoundError:
         name = bug.assigned_to_detail['real_name']
+    if first_name and ' ' in name:
+        name, _ = name.split(' ', 1)
+    return name
+
+
+def find_qa_contact(bug, first_name=False):
+    """Read human name from a cache and fall back to Bugzilla's user name
+    """
+    xdg_cache_home = os.getenv('XDG_CACHE_HOME', '~/.cache')
+    xdg_cache_home = os.path.expanduser(xdg_cache_home)
+    cache_path = os.path.join(xdg_cache_home, 'rhcephbugs', bug.qa_contact)
+    try:
+        with open(cache_path) as file:
+            name = file.read().strip()
+    except FileNotFoundError:
+        name = bug.qa_contact_detail['real_name']
     if first_name and ' ' in name:
         name, _ = name.split(' ', 1)
     return name

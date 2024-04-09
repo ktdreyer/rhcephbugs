@@ -27,11 +27,11 @@ The ``report`` subcommand will print a report to STDOUT for this release.
 retarget
 --------
 
-The retarget tool will mass-retarget bugs from one target milestone to
+The ``retarget`` tool will mass-retarget bugs from one target release to
 another.
 ::
 
-    retarget 3.3 z3 z4 1801090
+    ./bin/retarget 6.1z6 6.1z7 "6.1z6 is a minimal release for CVE-2023-49569 (bug 2259725). retargeting to 6.1z7" 2259725 2273724
 
 
 TODO List

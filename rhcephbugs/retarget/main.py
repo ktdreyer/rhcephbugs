@@ -22,13 +22,15 @@ def main():
 
     sorted_bugs = sorted(bugs, key=bz.sort_by_status)
 
+    bzapi = None
     bug_ids = []
     for bug in sorted_bugs:
         print('https://bugzilla.redhat.com/%d - %s - %s'
               % (bug.id, bug.status, bug.summary))
         bug_ids.append(bug.id)
+        if bzapi is None:
+            bzapi = bug.bugzilla
 
-    bzapi = bug.bugzilla
     update = bzapi.build_update(target_milestone=args.new_milestone,
                                 comment=args.comment,
                                 comment_private=True)

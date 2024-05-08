@@ -92,7 +92,7 @@ def prompt_new_action(bug, old_action):
     print(' .help - this text')
     print(f' .n - {assignee} determine next step for this BZ')
     print(f' .up - {assignee} to fix upstream and cherry-pick to {patches_branch} downstream')
-    print(f' .q - {qa_contact} to fix upstream and cherry-pick to {patches_branch} downstream')
+    print(f' .q - {qa_contact} to set qa_ack+ flag')
     return prompt_new_action(bug, old_action)
 
 
